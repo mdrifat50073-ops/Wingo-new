@@ -4,18 +4,28 @@ import requests, threading, time, datetime
 app = Flask(__name__)
 
 BOT_TOKEN = "7974512394:AAGAPR3ZCn6JlGnzIAa2oaXlmsjwOyJ4X-4"
-CHAT_ID = "5339569345"
+CHAT_ID = "6848807471"
 
 running = False
 period = None
 
 def get_period():
     now = datetime.datetime.now()
-    return now.strftime("%H%M")
+    return now.strftime("%Y%m%d%H%M%S")  # Unique period format
 
-def generate_signal():
-    # Customize your prediction logic here
-    return "🟢 Signal: Green"
+def predict(period):
+    digit = int(str(period)[-1])
+    size = "Big" if digit in [1, 4, 5, 7, 8] else "Small"
+    color = "Red" if digit in [1, 4, 7] else "Green" if digit in [2, 5, 8] else "Violet"
+    return size, color
+
+def generate_message(period):
+    size, color = predict(period)
+    return f"""🎲 Number Prediction for Hgnice-App
+
+🎯 Period: {period}
+🎰 Result: {size}
+💠 Colour: {color}"""
 
 def send_message(text):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -28,13 +38,13 @@ def signal_loop():
         current = get_period()
         if current != period:
             period = current
-            signal = generate_signal()
-            send_message(f"⏱️ Period: {period}\n{signal}")
+            msg = generate_message(period)
+            send_message(msg)
         time.sleep(1)
 
 @app.route(f"/{BOT_TOKEN}", methods=["POST"])
 def telegram_webhook():
-    global running, period
+    global running
     data = request.get_json()
 
     if "message" in data:
