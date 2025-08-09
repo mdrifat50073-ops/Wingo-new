@@ -3,10 +3,12 @@ import time, threading, requests
 
 app = Flask(__name__)
 
+# 🔐 Bot credentials
 BOT_TOKEN = "7974512394:AAGAPR3ZCn6JlGnzIAa2oaXlmsjwOyJ4X-4"
 CHAT_ID = "6848807471"
 
-running = False  # 🔴 Loop control flag
+# 🔄 Loop control
+running = False
 
 def send_prediction():
     message = "📡 Wingo Signal: Red ✅"
@@ -35,8 +37,6 @@ def webhook():
                 reply = "✅ Bot Started"
             else:
                 reply = "⚠️ Bot already running"
-            requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-                          data={"chat_id": chat_id, "text": reply})
 
         elif text == "/stop":
             if running:
@@ -44,7 +44,15 @@ def webhook():
                 reply = "🛑 Bot Stopped"
             else:
                 reply = "⚠️ Bot is not running"
-            requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-                          data={"chat_id": chat_id, "text": reply})
+
+        else:
+            reply = "🤖 Unknown command"
+
+        requests.post(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+                      data={"chat_id": chat_id, "text": reply})
 
     return "ok"
+
+# 🚀 Run Flask app
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=10000)
